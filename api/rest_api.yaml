@@ -1,0 +1,990 @@
+basePath: /api/v1
+definitions:
+  controllers.Author:
+    properties:
+      avatar:
+        type: string
+      followerCount:
+        type: integer
+      nickname:
+        type: string
+      subscription:
+        type: boolean
+    type: object
+  controllers.Chat:
+    properties:
+      chat_id:
+        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/controllers.Message'
+        type: array
+    type: object
+  controllers.ChatShort:
+    properties:
+      chat_id:
+        type: integer
+      message:
+        $ref: '#/definitions/controllers.Message'
+    type: object
+  controllers.Comment:
+    properties:
+      author:
+        $ref: '#/definitions/controllers.Author'
+      id:
+        type: integer
+      text:
+        type: string
+      timeStamp:
+        type: string
+    type: object
+  controllers.CommentCreateRequest:
+    properties:
+      postID:
+        type: integer
+      text:
+        type: string
+    type: object
+  controllers.Country:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  controllers.GeoPoint:
+    properties:
+      city:
+        type: string
+      coords:
+        items:
+          type: number
+        type: array
+      country:
+        type: string
+    type: object
+  controllers.Message:
+    properties:
+      author:
+        $ref: '#/definitions/controllers.Author'
+      id:
+        type: integer
+      text:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  controllers.MessageCreateRequest:
+    properties:
+      chatID:
+        type: integer
+      text:
+        type: string
+    type: object
+  controllers.MostRatedCountriesResponse:
+    properties:
+      countries:
+        items:
+          $ref: '#/definitions/controllers.Country'
+        type: array
+    type: object
+  controllers.Post:
+    properties:
+      badReaction:
+        type: integer
+      geotag:
+        $ref: '#/definitions/controllers.GeoPoint'
+      goodReaction:
+        type: integer
+      id:
+        type: integer
+      images:
+        items:
+          type: string
+        type: array
+      publisher:
+        $ref: '#/definitions/controllers.Author'
+      text:
+        type: string
+    type: object
+  controllers.PostCreateRequest:
+    properties:
+      coords:
+        items:
+          type: number
+        type: array
+      images:
+        items:
+          type: string
+        type: array
+      text:
+        type: string
+    type: object
+  controllers.PostReactRequest:
+    properties:
+      reaction:
+        type: boolean
+    type: object
+  controllers.ResponseError:
+    properties:
+      message:
+        type: string
+      uuid:
+        type: string
+    type: object
+  controllers.SendAuthCodeRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  controllers.SignUpRequest:
+    properties:
+      authCode:
+        type: integer
+      email:
+        type: string
+    type: object
+externalDocs:
+  description: Course link
+  url: https://balun.courses/courses/system_design
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a social network rest api.
+  title: Travel Social Network
+  version: "1.0"
+paths:
+  /auth/sendAuth:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.SendAuthCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      summary: Послать код авторизации на почту
+      tags:
+      - auth
+  /auth/signIn:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          headers:
+            Set-Cookie:
+              description: AuthToken=abcdef; Path=/;
+              type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      summary: Аутентификация пользователя
+      tags:
+      - auth
+  /chat/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: chatID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Chat'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Чат не найден
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить чат по id
+      tags:
+      - chat
+  /chat/{id}/messages:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: chatID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: cursorMessageID
+        in: query
+        name: messageID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controllers.Message'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить массив сообщений из чата, начиная с определенного messageID
+      tags:
+      - chat
+  /chat/message:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.MessageCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Отправить сообщение
+      tags:
+      - chat
+  /chat/short:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ChatShort'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить информацию о чатах пользователя с последним сообщением в чате
+      tags:
+      - chat
+  /chat/user/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: userID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Chat'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить чат с конкретным пользователем
+      tags:
+      - chat
+  /comments:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: postID
+        in: query
+        name: postID
+        required: true
+        type: integer
+      - description: sortDirection
+        enum:
+        - 1
+        - 0
+        in: query
+        name: sort
+        type: integer
+      - description: sortByField
+        enum:
+        - '"timeStamp"'
+        - '"authorFollowersCount"'
+        in: query
+        name: by
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controllers.Comment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить комментарии к посту
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: create post
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CommentCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Опубликовать комментарий
+      tags:
+      - comments
+  /feed:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: cityID
+        in: query
+        name: city
+        type: integer
+      - description: countryID
+        in: query
+        name: country
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controllers.Post'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить ленту рекомендаций (свою)
+      tags:
+      - feed
+  /feed/user/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: userID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controllers.Post'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить ленту публикаций пользователя
+      tags:
+      - feed
+  /post:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.PostCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Опубликовать пост
+      tags:
+      - post
+  /post/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: postID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Удалить пост
+      tags:
+      - post
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: postID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить публикацию по id
+      tags:
+      - post
+  /post/{id}/react:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: postID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.PostReactRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Оценка поста (лайк или дизлайк)
+      tags:
+      - post
+  /post/getMostRatedCities:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: rate sort
+        in: query
+        name: rateSort
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.MostRatedCountriesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить самые популярные города
+      tags:
+      - post
+  /post/getMostRatedCountries:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: rate sort
+        in: query
+        name: rateSort
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.MostRatedCountriesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить самые популярные страны
+      tags:
+      - post
+  /users:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controllers.Author'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить список пользователей
+      tags:
+      - users
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: userID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Author'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Получить информацию о пользователе
+      tags:
+      - users
+  /users/{id}/subscribe:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: userID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Подписаться на пользователя
+      tags:
+      - users
+  /users/{id}/unsubscribe:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: userID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ResponseError'
+      security:
+      - AuthToken: []
+      summary: Отменить подписку на пользователя
+      tags:
+      - users
+securityDefinitions:
+  AuthToken:
+    description: Токен который получаем при аутентификации пользователя
+    in: header
+    name: cookie
+    type: apiKey
+swagger: "2.0"
