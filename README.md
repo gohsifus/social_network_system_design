@@ -58,7 +58,7 @@ RPS = 10 000 000 * 161 / 86400 = 18 634
 
 * Комментарии
 ```
-avgRequestsPerDay = 20 + 4 = 24 (30 раз подгрузил комментарии, 4 создал)
+avgRequestsPerDay = 20 + 4 = 24 (20 раз подгрузил комментарии, 4 создал)
 
 RPS = 10 000 000 * 24 / 86400 = 2 777
 ```
@@ -149,6 +149,45 @@ Connections = dau * 0.1
 
 Connections = 10 000 000 * 0.1 = 1 000 000
 ```
+
+<hr>
+
+## Расчет дисков
+Формулы:
+```
+Disks_for_capacity = capacity / disk_capacity
+Disks_for_throughput = traffic_per_second / disk_throughput
+Disks_for_iops = iops / disk_iops
+Disks = max(ceil(Disks_for_capacity), ceil(Disks_for_throughput), ceil(Disks_for_iops))
+```
+
+Capacity на 1 год: 
+```
+postsWriteTrafficOneUserPerDay    = 1 * 100400b = 100 400 b
+commentsWriteTrafficOneUserPerDay = 4 * 100b = 400 b
+messagesWriteTrafficOneUserPerDay = 5 * 200b = 1000 b
+usersWriteTrafficOneUserPerDay    = 2 * 100000b = 200 000 b
+
+fullWriteTrafficPerDay = 301 800 b * 10 000 000 = 3TB
+
+capacityRough = fullWriteTrafficPerDay * 365 = 3 TB * 365 = 1095 TB
+
+Возьмем 20% запас
+capacity = capacityRough * 1.2 = 1314 TB
+```
+
+Количество необходимых дисков:
+```
+capacity = 1314 TB
+throughput = 1880 MB/s
+iops = 25 000
+
+Disks_for_capacity = 1314 / disk_capacity = 42 HDD or 14 SSD or 44 SSD(nVME)
+Disks_for_throughput = 1880 MB / disk_throughput = 19 HDD or 4 SSD or 1 SSD(nVME) 
+Disks_for_iops = 25 000 / disk_iops = 250 HDD or 25 SSD or 3 SSD(nVME)
+Disks = max(ceil(Disks_for_capacity), ceil(Disks_for_throughput), ceil(Disks_for_iops)) = 25 SSD (по 100TB)
+```
+
 
 
 
