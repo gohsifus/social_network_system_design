@@ -39,26 +39,13 @@ Table images {
   created_at timestamp
 }
 
-Table chats {
-  id int [primary key]
-  left_user_id int
-  right_user_id int
-}
-
-Table messages {
-  id int [primary key]
-  chat_id int
-  message text
-  author int
-  created_at timestamp
-}
-
 Table comments {
   id int [primary key]
   post_id int
   comment text
   author int
   created_at timestamp
+  reply_comment_id int [null]
 }
 
 Table geopoints {
@@ -80,9 +67,14 @@ Table countries {
 
 Table reactions {
   id int [primary key]
-  value bool
+  value reactions
   post_id int [ref: - posts.id]
   user_id int [ref: - users.id]
+}
+
+Enum reactions {
+  like
+  dislike
 }
 
 Ref: posts.user_id > users.id // many-to-one
@@ -91,8 +83,6 @@ Ref: users.id < follows.following_user_id
 
 Ref: users.id < follows.followed_user_id
 
-Ref: chats.id < messages.chat_id
-
-Ref: messages.author > users.id
-
 Ref: comments.post_id > posts.id
+
+Ref: comments.reply_comment_id > comments.id

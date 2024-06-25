@@ -166,26 +166,75 @@ Capacity на 1 год:
 postsWriteTrafficOneUserPerDay    = 1 * 100400b = 100 400 b
 commentsWriteTrafficOneUserPerDay = 4 * 100b = 400 b
 messagesWriteTrafficOneUserPerDay = 5 * 200b = 1000 b
-usersWriteTrafficOneUserPerDay    = 2 * 100000b = 200 000 b
+usersWriteTrafficOneUserPerDay    = 0.1 * 100000b = 10 000 b (write по сути только на создание имеет размер)
 
-fullWriteTrafficPerDay = 301 800 b * 10 000 000 = 3TB
+fullPostsWriteTrafficPerDay = 100 400 b * 10 000 000 = 1TB
+fullcommentsWriteTrafficPerDay = 400 b * 10 000 000 = 4 GB
+fullMessagesWriteTrafficPerDay = 1000 b * 10 000 000 = 10 GB
+fullUsersWriteTrafficPerDay = 10 000 b * 10 000 000 = 100 GB
 
-capacityRough = fullWriteTrafficPerDay * 365 = 3 TB * 365 = 1095 TB
+capacityRoughPosts = fullPostsWriteTrafficPerDay * 365 = 1 TB * 365 = 365 TB
+capacityRoughComments = fullCommentsWriteTrafficPerDay * 365 = 4 GB * 365 =  1.5 TB
+capacityRoughMessages = fullMessagesWriteTrafficPerDay * 365 = 10 GB * 365 = 3.7 TB
+capacityRoughUsers = fullUsersWriteTrafficPerDay * 365 = 100 GB * 365 = 37 TB
+
 
 Возьмем 20% запас
-capacity = capacityRough * 1.2 = 1314 TB
+capacityPosts = capacityRoughPosts * 1.2 = 438 TB
+capacityComments = capacityRoughComments * 1.2 = ~2 TB
+capacityPostsMessages = capacityRoughMessages * 1.2 = ~5 TB
+capacityPostsUsers = capacityRoughUsers * 1.2 = 45 TB
+
+capacity = 490 TB
 ```
 
 Количество необходимых дисков:
+#### Posts
 ```
-capacity = 1314 TB
-throughput = 1880 MB/s
-iops = 25 000
+capacity = 438 TB
+throughput = 13 MB/s
+iops = 18 634
 
-Disks_for_capacity = 1314 / disk_capacity = 42 HDD or 14 SSD or 44 SSD(nVME)
-Disks_for_throughput = 1880 MB / disk_throughput = 19 HDD or 4 SSD or 1 SSD(nVME) 
-Disks_for_iops = 25 000 / disk_iops = 250 HDD or 25 SSD or 3 SSD(nVME)
-Disks = max(ceil(Disks_for_capacity), ceil(Disks_for_throughput), ceil(Disks_for_iops)) = 25 SSD (по 100TB)
+Disks_for_capacity = 438 / disk_capacity = 14 HDD or 5 SSD or 15 SSD(nVME)
+Disks_for_throughput = 1870 MB / disk_throughput = 19 HDD or 4 SSD or 1 SSD(nVME) 
+Disks_for_iops = 18 634 / disk_iops = 187 HDD or 19 SSD or 2 SSD(nVME)
+Disks = max(ceil(Disks_for_capacity), ceil(Disks_for_throughput), ceil(Disks_for_iops)) = 5 SSD (по 100TB)
+```
+
+#### Comments
+```
+capacity = 1.5 TB
+throughput = 14 MB/s
+iops = 2 777
+
+Disks_for_capacity = 1.5 / disk_capacity = 1 HDD or 1 SSD or 1 SSD(nVME)
+Disks_for_throughput =  14 MB / disk_throughput = 1 HDD or 1 SSD or 1 SSD(nVME) 
+Disks_for_iops = 2 777 / disk_iops = 28 HDD or 3 SSD or 1 SSD(nVME)
+Disks = max(ceil(Disks_for_capacity), ceil(Disks_for_throughput), ceil(Disks_for_iops)) = 3 SSD (по 2TB)
+```
+
+#### Messages
+```
+capacity = 3.7 TB
+throughput = 18 MB/s
+iops = 1 736
+
+Disks_for_capacity = 3.7 / disk_capacity = 1 HDD or 1 SSD or 1 SSD(nVME)
+Disks_for_throughput =  18 MB / disk_throughput = 1 HDD or 1 SSD or 1 SSD(nVME) 
+Disks_for_iops = 1 736 / disk_iops = 18 HDD or 2 SSD or 1 SSD(nVME)
+Disks = max(ceil(Disks_for_capacity), ceil(Disks_for_throughput), ceil(Disks_for_iops)) = 2 SSD (по 5TB)
+```
+
+#### Users
+```
+capacity = 45 TB
+throughput = 18 MB/s
+iops = 1 388
+
+Disks_for_capacity = 45 / disk_capacity = 2 HDD or 1 SSD or 2 SSD(nVME)
+Disks_for_throughput =  18 MB / disk_throughput = 1 HDD or 1 SSD or 1 SSD(nVME) 
+Disks_for_iops = 1 388 / disk_iops = 14 HDD or 2 SSD or 1 SSD(nVME)
+Disks = max(ceil(Disks_for_capacity), ceil(Disks_for_throughput), ceil(Disks_for_iops)) = 2 SSD (по 30TB)
 ```
 
 

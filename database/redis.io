@@ -1,7 +1,7 @@
 // Хочется что-то кешировать, например посты, т.к к популярному посту может быть оч много обращений
 
-table cache {
-  url varchar [unique]
-  response json
+table postsCache {
+  postID int [primary key]
+  postData json
   ttl time
 }
