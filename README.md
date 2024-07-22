@@ -237,6 +237,38 @@ Disks_for_iops = 1 388 / disk_iops = 14 HDD or 2 SSD or 1 SSD(nVME)
 Disks = max(ceil(Disks_for_capacity), ceil(Disks_for_throughput), ceil(Disks_for_iops)) = 2 SSD (по 30TB)
 ```
 
+# Расчет количества хостов
+Формула
+```
+Hosts = disks / disks_per_host
+Hosts_with_replication = hosts * replication_factor
+```
+
+Рассчитаем хосты для баз (у разных бд может быть разная репликация)
+```
+Users = 2 disks
+Comments = 3 disks
+Posts = 5 disks
+
+Messages = 2 Disks
+
+Для бд мессенджера:
+Hosts = 2/2 = 1
+Hosts_with_replication = 1 * 3 = 3
+
+Для изображений (s3):
+Hosts = 4/2 = 2
+Hosts_with_replication = 2 * 3 = 6
+
+Для постов и связанных сущностей (юзеры комменты и т.д):
+Hosts = 6 / 2 = 3
+Hosts_with_replication = 3 * 4 = 12
+
+В итоге:
+Hosts = 6
+Hosts_with_replication = 21
+```
+
 
 
 

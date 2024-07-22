@@ -1,6 +1,7 @@
 // Replication:
 // - master-slave (sync)
-// - replication factor 5
+// - replication factor 4
+// - репликация по разным ДЦ для отказоустойчивости
 //
 // Sharding:
 // - не будет, т.к преобладают операции чтения
