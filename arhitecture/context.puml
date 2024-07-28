@@ -1,0 +1,13 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+System_Ext(oauth, "Authentication system", "OAuth 2.0 based on email")
+Container(coreSystem, "Core system", "Software system", "Allows users to create and view publications, leave comments and reactions to posts, view profiles of other users, and subscribe to their publications")
+Container(messengerSystem, "internal messenger system", "Software system", "Allows users to communicate inside the `social network system`")
+
+Rel(user, coreSystem, "Creates posts, get posts, leave comments, send reactions")
+Rel(user, messengerSystem, "Creates chats and provide messaging with other `social network system`'s users")
+Rel(user, oauth, "Authentication")
+Rel(coreSystem, oauth, "Uses", "OAuth2 - check user access")
+@enduml

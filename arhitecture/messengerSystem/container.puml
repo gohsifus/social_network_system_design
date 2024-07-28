@@ -1,0 +1,20 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
+Container(coreSystemService, "Core system", "Software system", "Allows users to create and view publications, leave comments and reactions to posts, view profiles of other users, and subscribe to their publications")
+
+System_Boundary(coreSystem, "Messenger system") {
+    Container(messenger, "Messenger Service", "Go", "Handles creation/view chats and messages", $tags="webApp")
+    ContainerDb(messengerDB, "Messenger database", "PgSQL", "Stores chats and messages",  $tags="db")
+    ContainerDb(usersCache, "Users Cache", "Redis", "Stores most popular user's info",  $tags="db")
+}
+
+Rel(user, loadBalancer, "Creates chats and provide messaging with other `social network system`'s users", "REST")
+Rel(loadBalancer, messenger, "Creates chats and provide messaging with other `social network system`'s users", "REST")
+
+Rel(messenger, messengerDB, "Creates and gets chats and messages")
+Rel(messenger, usersCache, "Gets and put users info from core service")
+Rel(messenger, coreSystemService, "Get Users information")
+@enduml
