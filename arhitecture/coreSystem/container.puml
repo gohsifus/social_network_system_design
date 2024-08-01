@@ -1,0 +1,39 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
+Container(messengerService, "Messenger system", "Software system", "Creates chats and provide messaging with other `social network system`'s users")
+
+System_Boundary(coreSystem, "Core System") {
+    Container(authService, "Auth Service", "Go", "Provides creating and viewing user info and users follows", $tags="webApp")
+    Container(socialNetworkService, "SocialNetwork Service", "Go", "Working with posts, comments, reactions, feeds", $tags="webApp")
+    Container(geoService, "Geo Service", "Go", "Get places from users, compress into geoTags and provide them", $tags="webApp")
+    Container(mediaService, "Media Service", "Go", "Storing images from users (posts, avatars)", $tags="webApp")
+
+
+    ContainerDb(socialNetworkDB, "SocialNetwork database", "PgSQL", "Stores posts, comments, reactions, feeds",  $tags="db")
+    ContainerDb(postsCache, "Posts Cache", "Redis", "Stores most popular posts info",  $tags="db")
+    ContainerDb(S3, "Image storage s3", "S3", "Stores images",  $tags="db")
+    ContainerDb(geoDB, "Geo database", "Postgis", "Stores information about places from posts and cities/countries",  $tags="db")
+    ContainerDb(authDB, "Users Database", "PgSQL", "Stores users information and follows",  $tags="db")
+}
+
+Rel(user, loadBalancer, "Allows users to create and view publications, leave comments and reactions to posts, view profiles of other users, and subscribe to their publications", "REST")
+Rel(loadBalancer, socialNetworkService, "Allows users to create and view publications, leave comments and reactions to posts, view profiles of other users, and subscribe to their publications", "REST")
+
+Rel(loadBalancer, messengerService, "Allows users to create and view chats and messages", "REST")
+
+Rel(socialNetworkService, socialNetworkDB, "Creates and gets posts, feeds, comments, reactions")
+Rel(socialNetworkService, postsCache, "Creates and gets most popular posts info")
+Rel(socialNetworkService, geoService, "Creates and gets positions (geoTags) from posts")
+Rel(socialNetworkService, mediaService, "GetImages")
+
+Rel(geoService, geoDB, "Gets and create geoTags from posts")
+Rel(authService, authDB, "Gets and create users and follows")
+
+Rel(mediaService, S3, "Get and store images from posts and users avatars")
+
+Rel(messengerService, authService, "Get users info and authorize")
+Rel(socialNetworkService, authService, "Get users info and authorize")
+@enduml
