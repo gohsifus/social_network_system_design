@@ -3,11 +3,11 @@
 
 Person(user, "User")
 System_Ext(oauth, "Authentication system", "OAuth 2.0 based on email")
-Container(coreSystem, "Core system", "Software system", "Allows users to create and view publications, leave comments and reactions to posts, view profiles of other users, and subscribe to their publications")
+Container(postsSystem, "Core system", "Software system", "Allows users to create and view publications, leave comments and reactions to posts, view profiles of other users, and subscribe to their publications")
 Container(messengerSystem, "internal messenger system", "Software system", "Allows users to communicate inside the `social network system`")
 
-Rel(user, coreSystem, "Creates posts, get posts, leave comments, send reactions")
+Rel(user, postsSystem, "Creates posts, get posts, leave comments, send reactions")
 Rel(user, messengerSystem, "Creates chats and provide messaging with other `social network system`'s users")
 Rel(user, oauth, "Authentication")
-Rel(coreSystem, oauth, "Uses", "OAuth2 - check user access")
+Rel(postsSystem, oauth, "Uses", "OAuth2 - check user access")
 @enduml
